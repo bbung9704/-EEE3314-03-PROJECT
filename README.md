@@ -98,20 +98,33 @@
       def forward(self, x):
          out = self.model.forward(x)
          return out
+
       def get_prams(self):
          if self.finetuning:
             return list(self.model.parameters()) + list(self.fc.parameters())
          else:
             return self.model.fc.parameters()
    ~~~
-   &nbsp;&nbsp;
-   학습할 이미지에 대한 ResNet의 적절한 learning rate 를 찾기 위해서 **learning rate가 0.00001일 때와 0.0001일 때** 모델의 성능을 비교해 보았다. 결과는 아래와 같다.
    <br>
-    |-|1st|2nd|3rd|4th|5th|6th|7th|8th|9th|10th|avg|
-    |-----|---|---|---|---|---|---|---|---|---|---|---|
-    |lr = 1E-5, epoch = 150|0.75|0.80|0.84|0.85|0.85|0.79|0.89|0.80|0.79|0.87|0.82|
-    |lr = 1E-4, epoch = 100|0.89|0.77|0.82|0.82|0.92|0.82|0.80|0.79|0.82|0.75|0.82|
-    <br>
+
+   &nbsp;&nbsp;
+   또한 학습할 이미지에 대한 ResNet의 적절한 learning rate 를 찾기 위해서 **learning rate가 0.00001일 때와 0.0001일 때** 모델의 성능을 비교해 보았다. 결과는 아래와 같다.
+   <br>
+
+    |-|1st|2nd|3rd|4th|5th|6th|7th|8th|9th|10th|AVG|STD|
+    |-----|---|---|---|---|---|---|---|---|---|---|---|---|
+    |lr = 1E-5, epoch = 150|0.75|0.80|0.84|0.85|0.85|0.79|0.89|0.80|0.79|0.87|0.82|0.042|
+    |lr = 1E-4, epoch = 100|0.89|0.77|0.82|0.82|0.92|0.82|0.80|0.79|0.82|0.75|0.82|0.049|
+   
+   &nbsp;&nbsp;
+    각 learning rate 별로 성능을 평가해본 결과 정확도와 표준편차에서 의미있는 성능 차이를 나타내지 못했다. 따라서 **ResNet에 대해서**는  학습시간을 줄이기 위해서 epoch를 줄여도 일정 성능 이상을 보여주는 **learing rate = 0.0001을 사용**했다.
+    <br><br>
+    &nbsp;&nbsp;
+    ResNet의 **train graph**는 아래와 같다.
+    <br><br>
+    <img src='./img/res_board.png'>
+    
+   <br><br>
 
 2. DenseNet
 3. MobileNet
