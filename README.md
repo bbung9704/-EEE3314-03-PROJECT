@@ -4,68 +4,70 @@
 **목차**
 
 [**1. Data**](#1-data)
-   1. More data
-   2. Preprocess
-   3. Augmentation
-   4. TSNE
+   
+   1. [More data](#1-more-data)<br>
+   2. [Preprocess](#2-preprocess)<br>
+   3. [Augmentation](#3-augmentation)<br>
+   4. [TSNE](#4-tsne)
    
 [**2. Model**](#2-model)
-   1. ResNet
-   2. DenseNet
-   3. MobileNet
-   4. Ensemble
+
+   1. [ResNet](#1-resnet)<br>
+   2. [DenseNet](#2-densenet)<br>
+   3. [MobileNet](#3-mobilenet)<br>
+   4. [Ensemble](#4-ensemble)
    
 [**3. Ensemble**](#3-ensemble)
-   1. Three different models
-   2. Three DenseNet
+   1. [Three different models](#1-three-different-models)<br>
+   2. [Three DenseNet](#2-three-densenet)
    
 [**4. Result**](#4-result)
 
 
 ## **1. Data**
-1. More data
+### **1. More data**
    
-    &nbsp;&nbsp;
-    이미지 분류에서 가장 중요한 것은 데이터의 양과 질이다. 또한 Pretrain된 모델에 추가로 분류할 데이터를 학습한다고 해도 추가되는 데이터의 양과 질은 보장되어야 한다. 따라서 학습을 위해 준비된 총 150장의 이미지 데이터는 충분한 양의 데이터가 되지못한다. 모델의 성능을 조금이라도 올리기 위해서 추가적인 데이터가 필요하다고 생각됐고, 150여 장의 이미지 데이터를 더 추가하여 **총 306장**의 이미지, Class 별로는 **formal: 98장, hiphop: 98장, vintage: 110장**의 이미지를 학습에 이용했다.
+   &nbsp;&nbsp;
+   이미지 분류에서 가장 중요한 것은 데이터의 양과 질이다. 또한 Pretrain된 모델에 추가로 분류할 데이터를 학습한다고 해도 추가되는 데이터의 양과 질은 보장되어야 한다. 따라서 학습을 위해 준비된 총 150장의 이미지 데이터는 충분한 양의 데이터가 되지못한다. 모델의 성능을 조금이라도 올리기 위해서 추가적인 데이터가 필요하다고 생각됐고, 150여 장의 이미지 데이터를 더 추가하여 **총 306장**의 이미지, Class 별로는 **formal: 98장, hiphop: 98장, vintage: 110장**의 이미지를 학습에 이용했다.
 
-2. Preprocess
+### **2. Preprocess**
    
    &nbsp;&nbsp;
    수집된 패션 이미지 데이터에는 우리가 원하는 정보 (옷에 대한 정보) 외에도 학습에 필요없는 노이즈 정보 (배경에 대한 정보) 가 포함되어있다. 모델에 노이즈도 같이 학습하여 모델이 노이즈를 판단할 수 있도록 할수도 있지만, 임의로 학습전 노이즈를 제거하여 모델의 성능을 더 높일 수 있을 것이라고 생각했다. 따라서 ["removebg"](https://www.remove.bg/)에서 이미지의 배경 정보를 모두 지웠으며, 배경이 제거된 이미지의 예시는 아래와 같다.
    <br><br>
    <img src='./img/removebg_ex1.png'>
 
-3. Augmentation
+### **3. Augmentation**
     
-    &nbsp;&nbsp;
-    이미지 데이터가 적기 때문에 추가로 이미지를 수집해 줬지만, 그럼에도 불구하고 높은 정확도의 성능을 보여주기 위해서는 이미지 데이터의 양이 부족하다고 생각됐기 때문에 Augmentation을 이용해서 데이터의 양을 늘려보려고 했다. 우리가 수집한 데이터에 맞는 기법을 추려보니 **"Random Horizontal flip"** 과 **"Random Crop"** 을 사용하면 이미지에서 우리가 원하는 정보를 크게 훼손하지 않고 Augmentation을 할 수 있을 것이란 생각이 들었다. 따라서 각각의 기법에 대해서 모델의 성능에 어떤 영향을 주는지 확인해 봤다.
-    <br><br>
-    &nbsp;&nbsp;
-    아래는 ResNet50 모델에서 파라미터 값 **learning rate = 0.00001, epoch = 150** 의 상황에서 **학습하는동안 보여준 최고 Test accuracy**를 각 기법 별 성능을 나타낸 것이다.
-    <br>
-    |-|1st|2nd|3rd|4th|5th|6th|7th|8th|9th|10th|avg|
-    |-----|---|---|---|---|---|---|---|---|---|---|---|
-    |Normal|0.79|0.89|0.87|0.84|0.87|0.85|0.84|0.82|0.84|0.87|0.85|
-    |HorizontalFlip(0.5)|0.79|0.80|0.75|0.84|0.80|0.80|0.90|0.85|0.85|0.93|0.83|
-    |Crop(224)|0.89|0.85|0.77|0.82|0.93|0.79|0.93|0.85|0.85|0.82|0.85|
-    |Flip(0.5)+Crop(224)|0.84|0.82|0.85|0.77|0.85|0.82|0.77|0.77|0.85|0.77|0.81|
+   &nbsp;&nbsp;
+   이미지 데이터가 적기 때문에 추가로 이미지를 수집해 줬지만, 그럼에도 불구하고 높은 정확도의 성능을 보여주기 위해서는 이미지 데이터의 양이 부족하다고 생각됐기 때문에 Augmentation을 이용해서 데이터의 양을 늘려보려고 했다. 우리가 수집한 데이터에 맞는 기법을 추려보니 **"Random Horizontal flip"** 과 **"Random Crop"** 을 사용하면 이미지에서 우리가 원하는 정보를 크게 훼손하지 않고 Augmentation을 할 수 있을 것이란 생각이 들었다. 따라서 각각의 기법에 대해서 모델의 성능에 어떤 영향을 주는지 확인해 봤다.
+   <br><br>
+   &nbsp;&nbsp;
+   아래는 ResNet50 모델에서 파라미터 값 **learning rate = 0.00001, epoch = 150** 의 상황에서 **학습하는동안 보여준 최고 Test accuracy**를 각 기법 별 성능을 나타낸 것이다.
+   <br>
+   |-|1st|2nd|3rd|4th|5th|6th|7th|8th|9th|10th|avg|
+   |-----|---|---|---|---|---|---|---|---|---|---|---|
+   |Normal|0.79|0.89|0.87|0.84|0.87|0.85|0.84|0.82|0.84|0.87|0.85|
+   |HorizontalFlip(0.5)|0.79|0.80|0.75|0.84|0.80|0.80|0.90|0.85|0.85|0.93|0.83|
+   |Crop(224)|0.89|0.85|0.77|0.82|0.93|0.79|0.93|0.85|0.85|0.82|0.85|
+   |Flip(0.5)+Crop(224)|0.84|0.82|0.85|0.77|0.85|0.82|0.77|0.77|0.85|0.77|0.81|
 
-    &nbsp;&nbsp;
-    각 기법 별로 성능을 평가해본 결과, 예상과는 달리 Augmentation을 한 경우와 하지 않은 경우에 성능에서 큰 차이를 보여주지 못했다. 또한 50% 확률로 HorizontalFlip을 한 경우와 HorizontalFlip과 Crop을 같이한 경우에는 오히려 성능이 떨어지는 결과를 나타냈다. 이 결과를 바탕으로 이후 사용되는 **Augmentation은 224x224 사이즈 RandomCrop만 사용했다.** 
-    <br><br>
-    &nbsp;&nbsp;
-    사용된 코드는 아래와 같다.   
-      ~~~python
-      train_transforms = transforms.Compose([transforms.Resize(img_size),
-                                 transforms.RandomCrop(224),
+   &nbsp;&nbsp;
+   각 기법 별로 성능을 평가해본 결과, 예상과는 달리 Augmentation을 한 경우와 하지 않은 경우에 성능에서 큰 차이를 보여주지 못했다. 또한 50% 확률로 HorizontalFlip을 한 경우와 HorizontalFlip과 Crop을 같이한 경우에는 오히려 성능이 떨어지는 결과를 나타냈다. 이 결과를 바탕으로 이후 사용되는 **Augmentation은 224x224 사이즈 RandomCrop만 사용했다.** 
+   <br><br>
+   &nbsp;&nbsp;
+   사용된 코드는 아래와 같다.   
+   ~~~python
+   train_transforms = transforms.Compose([transforms.Resize(img_size),
+                              transforms.RandomCrop(224),
+                              transforms.ToTensor(),
+                              ])
+   test_transforms = transforms.Compose([transforms.Resize(img_size),
                                  transforms.ToTensor(),
                                  ])
-      test_transforms = transforms.Compose([transforms.Resize(img_size),
-                                    transforms.ToTensor(),
-                                    ])
-      ~~~
+   ~~~
 
-4. TSNE
+### **4. TSNE**
    
    &nbsp;&nbsp;
    TSNE는 고차원 데이터를 데이터의 특징을 살린 저차원의 데이터로 바꿔 시각화 할 수 있도록 해주는 알고리즘이다. 이 알고리즘을 이용해서 수집된 패션 이미지를 시각화한 결과는 아래와 같다.
@@ -119,7 +121,7 @@
    ~~~
 
 ## **2. Model**
-1. ResNet
+### **1. ResNet**
 
    &nbsp;&nbsp;
    이미지 분류를 위해서 먼저 ResNet을 사용했으며, pytorch에서 제공되는 ResNet50 모델에 Fully Connected layer를 추가하여 사용하였다. Pretrain된 모델을 사용하였기 때문에 준비된 이미지로 학습을 시킬 때에는 finetuning을 하지 않고 FC layer의 파라미터만 학습시켰다.
@@ -172,7 +174,7 @@
     <br><br>
     <img src='./img/res_board.png'>
 
-2. DenseNet
+### **2. DenseNet**
    
    &nbsp;&nbsp;
    ResNet을 이용해서 이미지 분류를 해본 결과 성능이 만족할만한 수준이 나오지 않아서 다른 모델을 이용해서 이미지 분류를 하려고 다른 모델을 테스트 해봤다. 그 중에서 DenseNet161을 이용한 결과 상대적으로 좋은 성능을 보여줬다.
@@ -232,7 +234,7 @@
 
    <img src='./img/den_board.png'>
 
-3. MobileNet
+### **3. MobileNet**
    
    &nbsp;&nbsp;
    ResNet과 DenseNet을 이용하여 이미지 분류를 해본결과 일정 수준 이상의 분류 정확도를 보여줬지만, 데이터셋의 크기가 너무 작고, 데이터에 라벨링을 하는 과정에서 인간의 주관적인 판단이 들어가기 때문에 각 Class별 패션 이미지의 특징을 잘 뽑아낼 수 없는 문제가 발생한다. 따라서 테스트셋에 어떠한 이미지가 들어가느냐에 따라서 모델의 정확도가 크게 변하게 된다. 즉, 정확도의 분산이 크게 되는 문제가 있다. 
@@ -295,7 +297,7 @@
 
    <img src='./img/mob_board.png'>
 
-4. Ensemble
+### **4. Ensemble**
    
    &nbsp;&nbsp;
    이미지 분류의 성능을 높이면서도 어떤 테스트셋으로 테스트하냐와 상관없이 꾸준한 성능을 보여주기 위해서 앙상블 기법을 사용했다. 사용된 코드는 아래와 같다.
@@ -323,7 +325,7 @@
    앙상블 모델은 따로 학습하지 않고 학습된 3개의 모델의 아웃풋을 평균내서 결과는 내는 **soft vote 방식**을 사용했다.
 
 ## **3. Ensemble**
-1. Three different Models
+### **1. Three different Models**
 
    &nbsp;&nbsp;
    앙상블 모델을 ResNet, DenseNet, MobileNet을 이용해서 구성했을 때, 성능은 아래와 같다.
@@ -342,7 +344,7 @@
    &nbsp;&nbsp;
    하지만 표준편차와 관련해서는 예상과는 달리 성능향상을 보여주지 못했다. 따라서 모델 성능의 분산은 테스트셋이 어떻게 정해지느냐에 크게 영향을 받는 것으로 볼 수 있다. 즉, 테스트셋이 패션 이미지의 특징을 잘 나타내지 못하게 정해지면 모든 모델의 성능이 낮아지고 그렇지 않으면 모든 모델의 성능이 높아지는 것이다. 따라서 이 문제를 해결하기 위해서는 **데이터셋의 크기가 더더욱 커질 필요성**이 있어 보인다. 
    
-2. Three DenseNet
+### **2. Three DenseNet**
 
    &nbsp;&nbsp;
    앙상블 모델을 이용하다보니 DenseNet의 성능이 매우 좋은 것에 비해서 다른 모델의 성능이 낮아서 DenseNet의 성능이 묻히는 것처럼 보였다. 따라서 DenseNet 3개를 앙상블하면 성능이 더 잘 나올 것이라 생각해서 테스트해봤다. 그 결과는 아래와 같다.
