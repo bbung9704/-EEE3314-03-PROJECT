@@ -7,6 +7,7 @@
    1. More data
    2. Preprocess
    3. Augmentation
+   4. TSNE
    
 [**2. Model**](#2-model)
    1. ResNet
@@ -63,6 +64,59 @@
                                     transforms.ToTensor(),
                                     ])
       ~~~
+
+4. TSNE
+   
+   &nbsp;&nbsp;
+   TSNE는 고차원 데이터를 데이터의 특징을 살린 저차원의 데이터로 바꿔 시각화 할 수 있도록 해주는 알고리즘이다. 이 알고리즘을 이용해서 수집된 패션 이미지를 시각화한 결과는 아래와 같다.
+   <img src='./img/tsne.png'>
+
+   &nbsp;&nbsp;
+   시각화 결과 각 라벨별로 군집이 제대로 생기는 것은 관찰되지 않았다. 학습 이미지를 수집하고 라벨링하는 과정에서 인간의 주관적인 판단이 개입되어서 라벨별 특징이 잘 잡히지 않았거나, 3x256x256 개의 features를 가지는 이미지이므로 너무 feature 수가 많아서 군집이 형성되지 않은 것 같다.
+   <br><br>
+   &nbsp;&nbsp;
+   위 시각화를 위해서 사용된 코드는 아래와 같다. 이 때 사용된 이미지에 Augmentation은 사용하지 않았다.
+   ~~~python
+   # TSNE Modeling
+   from sklearn.manifold import TSNE
+   import pandas as pd
+   from plotnine import *
+
+   first = 1
+   for x_data, y_data in testloader:
+   if (first == 1):
+      x = x_data
+      y = y_data
+      first = 0
+   else:  
+      x = torch.cat((x,x_data), dim=0)
+      y = torch.cat((y,y_data), dim=0)
+   
+   for x_data, y_data in trainloader:
+   x = torch.cat((x,x_data), dim=0)
+   y = torch.cat((y,y_data), dim=0)
+
+
+   x = x.flatten(start_dim=1, end_dim=-1)
+   y = y.unsqueeze(1)
+   t = torch.cat((x,y), dim=1)
+   t = t.numpy()
+
+   df = pd.DataFrame(t)
+   df.rename(columns = {196608: "label"}, inplace=True)
+
+   tsne = TSNE(n_components=2, verbose=1, perplexity=10, learning_rate=20, n_iter=1000)
+   tsne_result = tsne.fit_transform(x)
+
+   df_tsne = df.copy()
+   df_tsne['x-tsne'] = tsne_result[:,0] 
+   df_tsne['y-tsne'] = tsne_result[:,1] 
+   chart = ggplot( df_tsne, aes(x='x-tsne', y='y-tsne', color='label') ) \
+         + geom_point(size=2, alpha=0.6) \
+         + ggtitle("tSNE dimensions colored by digit") 
+
+   print(chart)
+   ~~~
 
 ## **2. Model**
 1. ResNet
